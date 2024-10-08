@@ -1,4 +1,49 @@
-    <!-- Page Preloder -->
+
+          
+
+        public function ProductListAjax(){
+            $products=Product::select('pro_name')->where('status','0')->get();
+            $data=[];
+
+            foreach($products as $items)
+            {
+                $data[]=$items['pro_name'];
+            }
+            return $data;
+        }
+
+
+        public function SearchProducts(Request $req){
+            //return $req;
+            $search_product=$req->product_name;
+            
+            if($search_product != "")
+            {
+                $category_data = Category::get();
+                $web_data=Website::get();
+                $products=Product::where("pro_name","LIKE","%$search_product%")->get();
+                //dd($products);
+                if($products)
+                {
+                    return view('front.searchproduct', compact('category_data','products','web_data'));
+                }
+                else
+                {
+                    return redirect()->back()->with('success', 'No product matched your search !');
+                }
+                
+
+            }
+            else
+            {
+                return redirect()->back();
+            }
+
+        }
+
+
+
+<!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
     </div>
