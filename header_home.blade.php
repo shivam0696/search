@@ -1,202 +1,209 @@
 
-          
 
-        public function ProductListAjax(){
-            $products=Product::select('pro_name')->where('status','0')->get();
-            $data=[];
-
-            foreach($products as $items)
-            {
-                $data[]=$items['pro_name'];
-            }
-            return $data;
-        }
-
-
-        public function SearchProducts(Request $req){
-            //return $req;
-            $search_product=$req->product_name;
-            
-            if($search_product != "")
-            {
-                $category_data = Category::get();
-                $web_data=Website::get();
-                $products=Product::where("pro_name","LIKE","%$search_product%")->get();
-                //dd($products);
-                if($products)
-                {
-                    return view('front.searchproduct', compact('category_data','products','web_data'));
-                }
-                else
-                {
-                    return redirect()->back()->with('success', 'No product matched your search !');
-                }
-                
-
-            }
-            else
-            {
-                return redirect()->back();
-            }
-
-        }
+    
 
 
 
-<!-- Page Preloder -->
-    <div id="preloder">
-        <div class="loader"></div>
-    </div>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-    <!-- Humberger Begin -->
-    <div class="humberger__menu__overlay"></div>
-    <!-- Header Section Begin -->
-    <header class="header">
-        <div class="header__top">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6 col-md-6">
-                        <div class="header__top__left">
-                            <ul>
-                                @foreach ( $web_data as $values)
-                                <li><i class="fa fa-envelope"></i> {{$values->web_email}}</li>
-                                @endforeach
-                                <li>Free Shipping for all Order of &#8377; 99</li>
+@extends('front.layout.app_other')  
 
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6">
-                        <div class="header__top__right">
-                            <div class="header__top__right__social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                            </div>
-                            <div class="header__top__right__auth">
-                                <a href="#"><i class="fa fa-user"></i> Login</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+@section ('content')
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-section set-bg" data-setbg="front/assets/img/breadcrumb.jpg">
         <div class="container">
             <div class="row">
-                <div class="col-lg-3">
-                    <div class="header__logo">
-                        <a href="index"><img src="{{asset('backend/images/'.$values->web_logo )}}" alt=""></a>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <nav class="header__menu">
-                        <ul>
-                            <li class="active"><a href="index">Home</a></li>
-                            <li><a href="shop">Shop</a></li>
-                            <li><a href="#">Pages</a>
-                                <ul class="header__menu__dropdown">
-                                    <li><a href="./shop-details.html">Shop Details</a></li>
-                                    <li><a href="./shoping-cart.html">Shoping Cart</a></li>
-                                    <li><a href="./checkout.html">Check Out</a></li>
-                                    
-                                </ul>
-                            </li>
-                           
-                            <li><a href="./contact.html">Contact</a></li>
-                        </ul>
-                    </nav>
-                </div>
-                <div class="col-lg-3">
-                    <div class="header__cart">
-                        <ul>
-                            <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>{{ count((array) session('cart')) }}</span></a></li>
-                        </ul>
-                        <div class="header__cart__price">item: <span>&#8377; 150.00</span></div>
-                    </div>
-                </div>
-            </div>
-            <div class="humberger__open">
-                <i class="fa fa-bars"></i>
-            </div>
-        </div>
-    </header>
-    <!-- Header Section End -->
-
-    <!-- Hero Section Begin -->
-    <section class="hero">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="hero__categories">
-                        <div class="hero__categories__all">
-                            <i class="fa fa-bars"></i>
-                            <span>All Categories</span>
-                        </div>
-                        @foreach ( $cat_data as $values)
-                        <ul>
-                            <li>{{ $values->name }}</li>
-                        </ul>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="col-lg-9">
-                    <div class="hero__search">
-                        <div class="hero__search__form">
-
-                            <form action="searchProduct" method="POST">
-                                @csrf
-                            <input type="search" name="product_name" id="product_search" value="" placeholder="Searh Your Product">
-                                <button type="submit" class="site-btn">SEARCH</button>
-                            </form>
-
-                        </div>
-                        <div class="hero__search__phone">
-                            <div class="hero__search__phone__icon">
-                                <i class="fa fa-phone"></i>
-                            </div>
-                            <div class="hero__search__phone__text">
-                                <h5>{{$values->web_mobile}}</h5>
-                                <span>support 24/7 time</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hero__item set-bg" data-setbg="front/assets/img/hero/banner.jpg">
-                        <div class="hero__text">
-                            <span>FRUIT FRESH</span>
-                            <h2>Vegetable <br />100% Organic</h2>
-                            <p>Free Pickup and Delivery Available</p>
-                            <a href="#" class="primary-btn">SHOP NOW</a>
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2>Shopping Cart</h2>
+                        <div class="breadcrumb__option">
+                            <a href="index">Home</a>
+                            <span>Cart Page</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <!-- Hero Section End -->
+    <!-- Breadcrumb Section End -->
 
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
+    <!-- Shoping Cart Section Begin -->
+    <section class="shoping-cart spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+            {{-- @if(session('success'))
+                    <div class="alert alert-success">
+                    {{ session('success') }}
+                    </div> 
+                @endif --}}
+                    <div class="shoping__cart__table">
+                        <table id="cart" class="table table-hover table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>Products</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $total = 0 @endphp
+                                @if(session('cart'))
+                             
+                                @foreach(session('cart') as $id => $details)
+                                    @php $total += $details['product_price'] * $details['quantity'] @endphp
+                                    
+                                <tr data-id="{{ $id }}">
+                                    <td data-th="Product">
+                                        <img src="{{asset('backend/images/'.$details['product_image'] )}}" width="100" height="100" class="img-responsive">
+                                        <h5>{{ $details['product_name'] }}</h5>
+                                    </td>
 
-    <script>
+                                    <td data-th="Price">
+                                        &#8377;{{ $details['product_price'] }}
+                                    </td>
+
+                                    <td data-th="Quantity">
+                                        <div class="pro-qty">
+                                            <button class="qty-btn minus">-</button>
+                                            <input type="text" value="{{ $details['quantity'] }}" class="quantity update-cart" />
+                                            <button class="qty-btn plus">+</button>
+                                        </div>
+                                    </td>
+                                    
+                                    <td data-th="Subtotal">
+                                        &#8377;{{ $details['product_price'] * $details['quantity'] }}
+                                    </td>
+                                    
+                                    <td class="actions" data-th="">
+                                        <button class="btn btn-danger btn-sm remove-from-cart" title="Delete Product"><i class="fa fa-trash-o"></i></button>
+                                    </td>
+                             </tr>
+                             @endforeach
+
+                             @endif
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="shoping__cart__btns">
+                        <a href="index" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
+                    </div>
+                </div>
       
-          var availableTags=[];
-          $.ajax({
-            method: "GET",
-            url: "productList",
-            success:function(response){
-                //console.log(response);
-                startAutoComplete(response);
+                <div class="col-lg-6">
+                    <div class="shoping__checkout">
+                        <h5>Cart Total</h5>
+                        <ul>
+                            <li>Grand Total <span>&#8377; {{ $total }} /-</span></li>
+                        </ul>
+                        <a href="#" class="primary-btn">PROCEED TO CHECKOUT</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Shoping Cart Section End -->
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+    function updateQuantity(element) {
+    const row = element.closest("tr");
+    const quantityValue = element.val();
+
+    $.ajax({
+        url: '{{ route('update.cart') }}',
+        method: "PATCH",
+        data: {
+            _token: '{{ csrf_token() }}',
+            id: row.data("id"),
+            quantity: quantityValue
+        },
+        success: function () {
+            window.location.reload();
+        },
+        error: function (xhr) {
+            console.error("Error updating quantity: ", xhr);
+        }
+    });
+}
+
+// Handle click events for + and - buttons
+$(".qty-btn").on("click", function (e) {
+    e.preventDefault();
+    const quantityInput = $(this).siblings(".quantity");
+    let currentVal = parseInt(quantityInput.val());
+
+    if ($(this).hasClass('plus')) {
+        quantityInput.val(currentVal + 1);
+    } else if ($(this).hasClass('minus')) {
+        if (currentVal > 1) {
+            quantityInput.val(currentVal - 1);
+        }
+    }
+
+    updateQuantity(quantityInput);
+});
+
+// Handle change events for quantity input
+$(".update-cart").on("change", function () {
+    let newValue = parseInt($(this).val());
+    if (newValue < 1) {
+        $(this).val(1); // Set minimum value to 1 if input is less than 1
+    }
+    updateQuantity($(this));
+});
+
+
+
+    
+        $(".remove-from-cart").click(function (e) {
+            //console.log('This is for testing to delete product');
+            e.preventDefault();
+            var ele = $(this);
+            if(confirm("Are you sure want to remove?")) {
+                $.ajax({
+                    url: '{{ route('remove.from.cart') }}',
+                    method: "DELETE",
+                    data: {
+                        _token: '{{ csrf_token() }}', 
+                        id: ele.parents("tr").attr("data-id")
+                    },
+    
+                    success: function (response) {
+                        window.location.reload();
+    
+                    }
+                });
             }
         });
-        function startAutoComplete(availableTags)
-        {
-        $( "#product_search" ).autocomplete({
-            source: availableTags
-          });
-
-        }
-
-         
     
     </script>
+@endsection
+
+@section('title')
+Cart Page
+@endsection
+
+@if (session('success'))
+<script>
+    $(document).ready(function() {
+        toastr.success("{{ session('success') }}");
+    });
+</script>
+@endif
+
+
+
+
