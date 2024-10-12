@@ -1,6 +1,28 @@
 
 
-    
+// route
+ Route::post('updateOrderStatus', [OrderController::class, 'updateOrderStatus']);
+
+
+//controller finction
+
+    public function updateOrderStatus(Request $request)
+{
+    // Validate the request
+    $request->validate([
+        'id' => 'required|exists:orders,id',
+        'status' => 'required|integer|min:0|max:3',
+    ]);
+
+    // Find the order and update its status
+    $order = Order::find($request->id);
+    $order->status = $request->status;
+    $order->save();
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Order status updated successfully!');
+}
+
 
 
 
@@ -8,201 +30,182 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-@extends('front.layout.app_other')  
+@extends('backend.layout.app')
 
-
-@section ('content')
-    <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="front/assets/img/breadcrumb.jpg">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb__text">
-                        <h2>Shopping Cart</h2>
-                        <div class="breadcrumb__option">
-                            <a href="index">Home</a>
-                            <span>Cart Page</span>
+    @section ('content')
+    <div class="content-wrapper">
+                <section class="content-header">
+                    <div class="container-fluid">
+                      <div class="row mb-2">
+                        <div class="col-sm-6">
+                          <h1>Manage Order</h1>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Breadcrumb Section End -->
+                        <div class="col-sm-6">
+                          <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                            <li class="breadcrumb-item active">Manage Order</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div><!-- /.container-fluid -->
+                  </section>
 
-    <!-- Shoping Cart Section Begin -->
-    <section class="shoping-cart spad">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-            {{-- @if(session('success'))
-                    <div class="alert alert-success">
-                    {{ session('success') }}
-                    </div> 
-                @endif --}}
-                    <div class="shoping__cart__table">
-                        <table id="cart" class="table table-hover table-condensed">
-                            <thead>
-                                <tr>
-                                    <th>Products</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                    <th>Subtotal</th>
-                                    <th>Action</th>
+                  <section class="content">
+                    <div class="col-md-12">
+                    <div class="container-fluid">
+                      <div class="row">
+                        <div class="col-12">
+                          <div class="card">
+                            <div class="card-header">
+                                   <h3 class="card-title">Total Product Order {{$TotalOrder}}</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body">
+
+                              <table id="example1" class="table table-bordered table-striped">
+                                <thead style="background-color:#007bff">
+                                <tr class="text-center" style="color:aliceblue">
+                                <th>Sr No</th>
+                                  <th>Order Id</th>
+                                  <th>Price</th>
+                                  <th>Quantity</th>
+                                  <th>Status</th>
+                                  <th>Action</th>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @php $total = 0 @endphp
-                                @if(session('cart'))
-                             
-                                @foreach(session('cart') as $id => $details)
-                                    @php $total += $details['product_price'] * $details['quantity'] @endphp
-                                    
-                                <tr data-id="{{ $id }}">
-                                    <td data-th="Product">
-                                        <img src="{{asset('backend/images/'.$details['product_image'] )}}" width="100" height="100" class="img-responsive">
-                                        <h5>{{ $details['product_name'] }}</h5>
-                                    </td>
-
-                                    <td data-th="Price">
-                                        &#8377;{{ $details['product_price'] }}
-                                    </td>
-
-                                    <td data-th="Quantity">
-                                        <div class="pro-qty">
-                                            <button class="qty-btn minus">-</button>
-                                            <input type="text" value="{{ $details['quantity'] }}" class="quantity update-cart" />
-                                            <button class="qty-btn plus">+</button>
-                                        </div>
-                                    </td>
-                                    
-                                    <td data-th="Subtotal">
-                                        &#8377;{{ $details['product_price'] * $details['quantity'] }}
-                                    </td>
-                                    
-                                    <td class="actions" data-th="">
-                                        <button class="btn btn-danger btn-sm remove-from-cart" title="Delete Product"><i class="fa fa-trash-o"></i></button>
-                                    </td>
-                             </tr>
-                             @endforeach
-
-                             @endif
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                            @foreach ( $order as $values )
+                                <tr class="text-center">
+                                 <td>{{$loop->iteration}}</td>
+                                <td>{{ $values->order_id}}</td>
+                                <td>{{ $values->pro_price}}</td>
+                                <td>{{ $values->pro_quantity}}</td>
+                                <td class="text-center">
+                                  <form action="updateOrderStatus" method="POST" class="d-inline">
+                                      @csrf
+                                      <input type="hidden" name="id" value="{{ $values->id }}">
+                                      <select name="status" class="form-control" onchange="this.form.submit()">
+                                          <option value="0" {{ $values->status == 0 ? 'selected' : '' }}>Pending</option>
+                                          <option value="1" {{ $values->status == 1 ? 'selected' : '' }}>Processing</option>
+                                          <option value="2" {{ $values->status == 2 ? 'selected' : '' }}>Hold</option>
+                                          <option value="3" {{ $values->status == 3 ? 'selected' : '' }}>Completed</option>
+                                      </select>
+                                  </form>
+                              </td>
+                              
+                                <td class="text-center"> 
+                                    <a href="/Vieworder?id={{ $values->id }}" class="btn btn-info" title="View record"><i class="fa fa-eye"></i></a>
+                                </td>
+                                </tr>
+                                @endforeach
+                                </tbody>
+                            </tr>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  </section>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="shoping__cart__btns">
-                        <a href="index" class="primary-btn cart-btn">CONTINUE SHOPPING</a>
-                    </div>
+
+    @endsection
+    @section('title')
+    Order
+    @endsection
+
+  
+    @if (session('success'))
+    <script>
+        $(document).ready(function() {
+            toastr.success("{{ session('success') }}");
+        });
+    </script>
+    @endif
+
+//view order
+                    <section class="content">
+  <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <a href="/order" class="btn btn-danger" style="margin-left:95%;">Back</a>
                 </div>
-      
-                <div class="col-lg-6">
-                    <div class="shoping__checkout">
-                        <h5>Cart Total</h5>
-                        <ul>
-                            <li>Grand Total <span>&#8377; {{ $total }} /-</span></li>
-                        </ul>
-                        <a href="#" class="primary-btn">PROCEED TO CHECKOUT</a>
-                    </div>
-                </div>
+                <div class="container mt-5">
+                  <!-- First Row: Order Details -->
+                  <div class="row mb-4">
+                      <div class="col-md-12">
+                        <fieldset class="border p-3 rounded">
+                          <legend class="w-auto px-2">Order Details</legend>
+                          <div class="d-flex justify-content-between">
+                              <div class="w-50 me-2">
+                                  <div class="mb-3">
+                                      <label class="fw-bold">Order Order Id:</label>
+                                      <p>{{ $order_data->order_id }}</p>
+                                  </div>
+                                  <div class="mb-3">
+                                      <label class="fw-bold">Product Price:</label>
+                                      <p>{{ $order_data->order_id }}</p> <!-- Make sure to use the correct property -->
+                                  </div>
+                              </div>
+                      
+                              <div class="w-50 ms-2">
+                                  <div class="mb-3">
+                                      <label class="fw-bold">Order Order Id:</label>
+                                      <p>{{ $order_data->order_id }}</p>
+                                  </div>
+                                  <div class="mb-3">
+                                      <label class="fw-bold">Product Price:</label>
+                                      <p>{{ $order_data->order_id }}</p> <!-- Make sure to use the correct property -->
+                                  </div>
+                              </div>
+                          </div>
+                      </fieldset>
+                      
+
+
+                      <fieldset class="border p-3 rounded">
+                        <legend class="w-auto px-2">Order Details</legend>
+                        <div class="d-flex justify-content-between">
+                            <div class="w-50 me-2">
+                                <div class="mb-3">
+                                    <label class="fw-bold">Order Id:</label>
+                                    <p>{{ $order_data->order_id }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="fw-bold">Product Price:</label>
+                                    <p>{{ $order_data->order_id }}</p>
+                                </div>
+                          
+                            </div>
+                            
+                            <div class="w-50 ms-2">
+                                <div class="mb-3">
+                                    <label class="fw-bold">Order Id:</label>
+                                    <p>{{ $order_data->order_id }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="fw-bold">Product Price:</label>
+                                    <p>{{ $order_data->order_id }}</p>
+                                </div>
+                         
+                            </div>
+                        </div>
+                    </fieldset>
+                      
+                      </div>
+                  </div>
+              </div>
+              
             </div>
         </div>
-    </section>
-    <!-- Shoping Cart Section End -->
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-
-    <script type="text/javascript">
-    function updateQuantity(element) {
-    const row = element.closest("tr");
-    const quantityValue = element.val();
-
-    $.ajax({
-        url: '{{ route('update.cart') }}',
-        method: "PATCH",
-        data: {
-            _token: '{{ csrf_token() }}',
-            id: row.data("id"),
-            quantity: quantityValue
-        },
-        success: function () {
-            window.location.reload();
-        },
-        error: function (xhr) {
-            console.error("Error updating quantity: ", xhr);
-        }
-    });
-}
-
-// Handle click events for + and - buttons
-$(".qty-btn").on("click", function (e) {
-    e.preventDefault();
-    const quantityInput = $(this).siblings(".quantity");
-    let currentVal = parseInt(quantityInput.val());
-
-    if ($(this).hasClass('plus')) {
-        quantityInput.val(currentVal + 1);
-    } else if ($(this).hasClass('minus')) {
-        if (currentVal > 1) {
-            quantityInput.val(currentVal - 1);
-        }
-    }
-
-    updateQuantity(quantityInput);
-});
-
-// Handle change events for quantity input
-$(".update-cart").on("change", function () {
-    let newValue = parseInt($(this).val());
-    if (newValue < 1) {
-        $(this).val(1); // Set minimum value to 1 if input is less than 1
-    }
-    updateQuantity($(this));
-});
+    </div>
+</div>
 
 
 
-    
-        $(".remove-from-cart").click(function (e) {
-            //console.log('This is for testing to delete product');
-            e.preventDefault();
-            var ele = $(this);
-            if(confirm("Are you sure want to remove?")) {
-                $.ajax({
-                    url: '{{ route('remove.from.cart') }}',
-                    method: "DELETE",
-                    data: {
-                        _token: '{{ csrf_token() }}', 
-                        id: ele.parents("tr").attr("data-id")
-                    },
-    
-                    success: function (response) {
-                        window.location.reload();
-    
-                    }
-                });
-            }
-        });
-    
-    </script>
-@endsection
 
-@section('title')
-Cart Page
-@endsection
-
-@if (session('success'))
-<script>
-    $(document).ready(function() {
-        toastr.success("{{ session('success') }}");
-    });
-</script>
-@endif
 
 
 
